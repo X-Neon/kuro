@@ -1,4 +1,8 @@
-# Kuro
+<p align="center">
+    <img height=120 src="img/logo.png"/>  
+</p>
+
+# kuro
 
 A C++20 coroutine library, somewhat modelled on Python's `asyncio`
 
