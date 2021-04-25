@@ -63,8 +63,8 @@ public:
     }
 
 private:
-    timespec m_time;
     detail::unique_fd m_fd;
+    timespec m_time;
 };
 
 }
