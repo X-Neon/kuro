@@ -44,7 +44,7 @@ public:
             return task_executor_return(std::coroutine_handle<promise_type>::from_promise(*this));
         }
         std::suspend_never initial_suspend() const noexcept { return {}; }
-        std::suspend_never final_suspend() const noexcept { return {}; }
+        std::suspend_always final_suspend() const noexcept { return {}; }
     };
 
     std::coroutine_handle<promise_type> m_handle;

@@ -44,11 +44,10 @@ protected:
             throw std::exception{};
         }
     }
-    
-    template <typename U>
-    void set_data(U&& data)
+
+    void set_data(T data)
     {
-        new(&m_data) T(std::forward<U>(data));
+        new(&m_data) T(std::move(data));
         m_state = promise_state::data;
     }
 

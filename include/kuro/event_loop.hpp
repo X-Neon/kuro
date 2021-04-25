@@ -91,12 +91,15 @@ public:
     static T run(task<T> root_task)
     {
         auto exec = [](task<T>& t) -> detail::task_executor_return<T> {
-            co_return co_await t;
+            auto x = co_await t;
+            co_return x;
         }(root_task);
 
         io_loop(root_task);
 
-        return exec.m_handle.promise().result();
+        auto result = exec.m_handle.promise().result();
+        exec.m_handle.destroy();
+        return result;
     }
     static void add_reader(int fd, std::coroutine_handle<> handle)
     {
