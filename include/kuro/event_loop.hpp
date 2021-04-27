@@ -91,15 +91,33 @@ public:
     static T run(task<T> root_task)
     {
         auto exec = [](task<T>& t) -> detail::task_executor_return<T> {
-            auto x = co_await t;
-            co_return x;
+            co_return co_await t;
         }(root_task);
 
         io_loop(root_task);
 
-        auto result = exec.m_handle.promise().result();
-        exec.m_handle.destroy();
-        return result;
+        if constexpr (std::is_void_v<T>) {
+            exec.m_handle.destroy();
+        } else {
+            T result = exec.m_handle.promise().result();
+            exec.m_handle.destroy();
+            return result;
+        }
+    }
+    template <typename T>
+    static T run(shared_task<T> root_task)
+    {
+        auto nonshared_root_task = [](shared_task<T>& t) -> task<T> {
+            if constexpr (std::is_void_v<T>) {
+                co_await t;
+            } else if constexpr (std::is_reference_v<T>) {
+                co_return co_await t;
+            } else {
+                co_return std::move(co_await t);
+            }
+        }(root_task);
+
+        return run(std::move(nonshared_root_task));
     }
     static void add_reader(int fd, std::coroutine_handle<> handle)
     {

@@ -54,26 +54,26 @@ public:
     {
         struct awaitable
         {
-            awaitable(task* ptr) : m_ptr(ptr) {}
+            awaitable(std::coroutine_handle<promise_type> handle) : m_handle(handle) {}
             T await_resume()
             {
-                return m_ptr->m_handle.promise().result();
+                return m_handle.promise().result();
             }
             bool await_ready() const noexcept
             {
-                return m_ptr->m_handle.done();
+                return m_handle.done();
             }
             std::coroutine_handle<> await_suspend(std::coroutine_handle<> parent_handle) noexcept
             {
-                m_ptr->m_handle.promise().set_continuation(parent_handle);
-                return m_ptr->m_handle;
+                m_handle.promise().set_continuation(parent_handle);
+                return m_handle;
             }
         
         private:
-            task* m_ptr;
+            std::coroutine_handle<promise_type> m_handle;
         };
 
-        return awaitable{this};
+        return awaitable{m_handle};
     }
 
     bool done() const noexcept

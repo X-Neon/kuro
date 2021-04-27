@@ -72,7 +72,7 @@ private:
     uint32_t m_addr;
 };
 
-std::ostream& operator<<(std::ostream& os, const ipv4_address& addr)
+inline std::ostream& operator<<(std::ostream& os, const ipv4_address& addr)
 {
     auto addr_int = addr.to_integer();
     auto bytes = reinterpret_cast<uint8_t*>(&addr_int);
@@ -173,7 +173,7 @@ private:
     uint16_t m_addr[8];
 };
 
-std::ostream& operator<<(std::ostream& os, const ipv6_address& addr)
+inline std::ostream& operator<<(std::ostream& os, const ipv6_address& addr)
 {
     bool in_range = false;
     int start;

@@ -8,14 +8,16 @@ add_global_arguments('-fcoroutines', language : 'cpp')
 include = include_directories('include')
 
 test_sources = files(
+    'test/gather.cpp',
     'test/main.cpp',
+    'test/shared_task.cpp',
     'test/task.cpp'
 )
 
-test_exe = executable(
-    'kuro_test', 
+kuro_tests = executable(
+    'kuro_tests', 
     test_sources,
     include_directories : include
 )
 
-test('test name', test_exe)
+test('kuro', kuro_tests)

@@ -24,9 +24,9 @@ public:
     {
         handle().resume();
     }
-    operator std::coroutine_handle<>() const
+    operator std::coroutine_handle<Promise>() const
     {
-        return std::coroutine_handle<>(handle());
+        return handle();
     }
 
 private:

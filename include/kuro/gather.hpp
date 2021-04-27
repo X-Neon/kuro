@@ -18,20 +18,15 @@ class gather
     using non_ref_t = std::conditional_t<std::is_reference_v<U>, ref_wrapper<std::remove_reference_t<U>>, U>;
 
 public:
-    gather(T... args) : m_await(std::forward<T>(args)...) {}
+    gather(T... args) : m_await(std::move(args)...) {}
     bool await_ready() const noexcept
     {
-        std::size_t n_ready = 0;
-        constexpr_for<0UL, std::tuple_size_v<decltype(m_await)>, 1UL>([this, n_ready](auto i) {
-            n_ready += std::get<i.value>(m_await).await_ready();
-        });
-
-        return n_ready == std::tuple_size_v<decltype(m_await)>;
+        return false;
     }
     void await_suspend(std::coroutine_handle<> handle) noexcept
     {
         std::coroutine_handle<> inc_handle = [this](std::coroutine_handle<> resume) -> detail::task_executor {
-            for (int i = 0; i < std::tuple_size_v<decltype(m_await)>; ++i) {
+            for (auto i = 0UL; i < std::tuple_size_v<decltype(m_await)>; ++i) {
                 co_await std::suspend_always{};
             }
             resume.resume();
