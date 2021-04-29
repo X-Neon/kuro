@@ -31,7 +31,7 @@ static kuro::task<void> modify_global_return_void()
     co_return;
 }
 
-TEST_CASE("Task")
+TEST_CASE("task")
 {
     REQUIRE(kuro::event_loop::run(return_10()) == 10);
 

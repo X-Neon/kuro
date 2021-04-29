@@ -19,7 +19,7 @@ static kuro::task<std::pair<std::optional<int>, std::optional<int>>> read_queue(
     co_return {first_attempt, second_attempt};
 }
 
-TEST_CASE("Cancellation")
+TEST_CASE("with_cancellation")
 {
     auto read_attempts = kuro::event_loop::run(read_queue());
     REQUIRE(!read_attempts.first);

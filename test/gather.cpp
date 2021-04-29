@@ -44,7 +44,7 @@ static kuro::task<std::tuple<int, std::unique_ptr<int>, int&, kuro::void_t, int,
     );
 }
 
-TEST_CASE("Gather")
+TEST_CASE("gather")
 {
     auto&& [a, b, c, d, e, f] = kuro::event_loop::run(gather());
     REQUIRE(a == 10);

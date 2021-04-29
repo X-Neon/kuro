@@ -50,7 +50,7 @@ static kuro::task<std::pair<int, int>> await_shared_many()
     co_return {co_await shared, co_await handle};
 }
 
-TEST_CASE("Shared task")
+TEST_CASE("shared_task")
 {
     REQUIRE(kuro::event_loop::run(return_10()) == 10);
 
