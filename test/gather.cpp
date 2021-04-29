@@ -39,7 +39,7 @@ static kuro::task<std::tuple<int, std::unique_ptr<int>, int&, kuro::void_t, int,
         return_unique_ptr(),
         return_ref(),
         return_void(),
-        std::move(t),
+        t,
         kuro::sleep_for(std::chrono::nanoseconds(10))
     );
 }

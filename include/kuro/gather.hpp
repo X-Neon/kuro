@@ -8,20 +8,23 @@
 namespace kuro
 {
 
-template <awaitable... T>
-class gather
+namespace detail
 {
-    template <typename U>
-    struct ref_wrapper { U* ptr; };
 
-    template <typename U>
-    using non_ref_t = std::conditional_t<std::is_reference_v<U>, ref_wrapper<std::remove_reference_t<U>>, U>;
-
+template <typename... T>
+class gather_impl
+{
 public:
-    gather(T... args) : m_await(std::move(args)...) {}
-    bool await_ready() const noexcept
+    gather_impl(T... args) : m_await(detail::awaitable_container<T>(std::forward<T>(args))...) {}
+
+    bool await_ready() noexcept
     {
-        return false;
+        std::size_t n_ready = 0;
+        constexpr_for<0UL, std::tuple_size_v<decltype(m_await)>, 1UL>([this, n_ready](auto i) mutable {
+            n_ready += std::get<i.value>(m_await).get().await_ready();
+        });
+
+        return n_ready == std::tuple_size_v<decltype(m_await)>;
     }
     void await_suspend(std::coroutine_handle<> handle) noexcept
     {
@@ -33,35 +36,35 @@ public:
         }(handle).m_handle;
 
         constexpr_for<0UL, std::tuple_size_v<decltype(m_await)>, 1UL>([this, inc_handle](auto i) {
-            [i](gather* ptr, std::coroutine_handle<> h) -> detail::task_executor {
-                using V = detail::awaited_t<std::tuple_element_t<i.value, std::tuple<T...>>>;
-                if constexpr (std::is_void_v<V>) {
-                    co_await std::get<i.value>(ptr->m_await);
-                } else if constexpr (std::is_reference_v<V>) {
-                    std::get<i.value>(ptr->m_result) = {&(co_await std::get<i.value>(ptr->m_await))};
-                } else {
-                    std::get<i.value>(ptr->m_result) = co_await std::get<i.value>(ptr->m_await);
+            using S = decltype(std::get<i.value>(m_await).get().await_suspend(inc_handle));
+            if constexpr (std::is_void_v<S>) {
+                std::get<i.value>(m_await).get().await_suspend(inc_handle);
+            } else if constexpr (std::is_same_v<S, bool>) {
+                if (!std::get<i.value>(m_await).get().await_suspend(inc_handle)) {
+                    inc_handle.resume();
                 }
-                h.resume();
-            }(this, inc_handle);
+            } else {
+                std::get<i.value>(m_await).get().await_suspend(inc_handle).resume();
+            }
         });
     }
     auto await_resume() noexcept
     {
-        return std::apply([](auto&&... args) -> std::tuple<detail::non_void_awaited_t<T>...> { return {transform(args)...}; }, m_result);
+        return std::apply([](auto&&... args) -> std::tuple<detail::non_void_awaited_t<T>...> { 
+            return {non_void_resume(args.get())...}; 
+        }, m_await);
     }
 
-private:
+protected:
     template <typename U>
-    static auto&& transform(U& u)
+    static decltype(auto) non_void_resume(U& await)
     {
-        return std::move(u);
-    }
-
-    template <typename U>
-    static auto& transform(ref_wrapper<U>& u)
-    {
-        return *u.ptr;
+        if constexpr (std::is_void_v<decltype(await.await_resume())>) {
+            await.await_resume();
+            return void_t{};
+        } else {
+            return await.await_resume();
+        }
     }
 
     template <auto Start, auto End, auto Inc, class F>
@@ -73,8 +76,35 @@ private:
         }
     }
 
-    std::tuple<T...> m_await;
-    std::tuple<non_ref_t<detail::non_void_awaited_t<T>>...> m_result;
+    std::tuple<detail::awaitable_container<T>...> m_await;
 };
+
+template <typename... T>
+class gather_cancel_impl : public gather_impl<T...>
+{
+public:
+    gather_cancel_impl(T... args) : gather_impl<T...>(std::forward<T>(args)...) {}
+
+    void await_cancel() noexcept
+    {
+        constexpr_for<0UL, std::tuple_size_v<decltype(this->m_await)>, 1UL>([this](auto i) mutable {
+            std::get<i.value>(this->m_await).get().await_cancel();
+        });
+    }
+};
+
+}
+
+template <awaitable... T>
+auto gather(T&&... args)
+{
+    constexpr bool cancel = (cancellable<T> && ...);
+    if constexpr (cancel) {
+        return detail::gather_cancel_impl<T...>(std::forward<T>(args)...);
+    } else {
+        return detail::gather_impl<T...>(std::forward<T>(args)...);
+    }
+}
+
 
 }
