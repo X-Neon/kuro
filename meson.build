@@ -8,7 +8,9 @@ install_subdir('include/kuro', install_dir : 'include')
 
 if get_option('build-tests')
     add_global_arguments('-fcoroutines', language : 'cpp')
+
     include = include_directories('include')
+    catch_include = include_directories('third_party/catch2')
 
     test_sources = files(
         'test/gather.cpp',
@@ -21,7 +23,7 @@ if get_option('build-tests')
     kuro_tests = executable(
         'kuro_tests', 
         test_sources,
-        include_directories : include
+        include_directories : [catch_include, include]
     )
 
     test('kuro', kuro_tests)
