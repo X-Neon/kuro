@@ -20,7 +20,7 @@ public:
     bool await_ready() noexcept
     {
         std::size_t n_ready = 0;
-        constexpr_for<0UL, std::tuple_size_v<decltype(m_await)>, 1UL>([this, n_ready](auto i) mutable {
+        constexpr_for<0UL, std::tuple_size_v<decltype(m_await)>, 1UL>([this, &n_ready](auto i) mutable {
             n_ready += std::get<i.value>(m_await).get().await_ready();
         });
 
