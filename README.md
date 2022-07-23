@@ -83,4 +83,4 @@ int main()
 
 ## Disclaimer
 
-This code is super-alpha quality. It's barely tested beyond writing simple examples, and is basically a hastily thrown together mess. If you want to get started with C++20 coroutines, you'll be better off using [cppcoro](https://github.com/lewissbaker/cppcoro), or waiting until [libunifex](https://github.com/facebookexperimental/libunifex) is more mature. Still, coroutines are a very complex and flexible language feature, and I hope looking at my code will help you understand how to use and implement coroutines in your own code.
+This code has not been thoroughly tested, and is not suitable for production use. If you actually want to buld something with C++20 coroutines, there are more mature solutions such as [folly/coro](https://github.com/facebook/folly/tree/main/folly/experimental/coro) and [libunifex](https://github.com/facebookexperimental/libunifex). Still, coroutines are a very complex and flexible language feature, and I hope looking at my code will help you understand how to use and implement coroutines in your own code.
