@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    container: chollyx/cmake-vcpkg:latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: cmake --preset NinjaMulti
+      - run: cmake --build --preset Asan
+      - run: ctest --preset Asan --output-on-failure
