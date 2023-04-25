@@ -11,6 +11,12 @@ jobs:
     container: chollyx/cmake-vcpkg:latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
       - run: cmake --preset NinjaMulti
       - run: cmake --build --preset Asan
       - run: ctest --preset Asan --output-on-failure
