@@ -8,7 +8,7 @@ A C++20 coroutine library, somewhat modelled on Python's `asyncio`
 
 ## Requirements
 
-Kuro requires a C++20 compliant compiler and a Linux OS. Tested on GCC 10.2 / Ubuntu 20.04.
+Kuro requires a C++20 compliant compiler and a Linux OS. Tested on GCC 11.3 / Ubuntu 22.04.
 
 ## Example
 
